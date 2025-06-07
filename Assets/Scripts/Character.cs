@@ -13,10 +13,13 @@ public class Character : MonoBehaviour
     public float verticalVelocity;
     public float gravity = -9.81f;
 
+    public Animator animator;
+
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
+        animator = GetComponent<Animator>();
     }
 
     public void CalculateMovement()
@@ -24,9 +27,12 @@ public class Character : MonoBehaviour
         movementDirection.Set(playerInput.horizontalInput, 0f, playerInput.verticalInput);
         movementDirection.Normalize();
         movementDirection = Quaternion.Euler(0f, -45f, 0f) * movementDirection;
+        animator.SetFloat("Speed", movementDirection.magnitude);
         movementDirection *= moveSpeed * Time.deltaTime;
         if (movementDirection != Vector3.zero)
             transform.rotation = Quaternion.LookRotation(movementDirection);
+
+        animator.SetBool("AirBorne", !controller.isGrounded);
     }
 
     private void FixedUpdate()
