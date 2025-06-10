@@ -21,6 +21,17 @@ public class Character : MonoBehaviour
     public UnityEngine.AI.NavMeshAgent navMeshAgent;
     public Transform targetPlayer;
 
+
+    //state machine
+    public enum CharacterState
+    {
+        Normal, Attacking
+    }
+
+    public CharacterState currentState;
+
+
+
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
@@ -41,6 +52,15 @@ public class Character : MonoBehaviour
 
     public void CalculatePlayerMovement()
     {
+
+        if (playerInput.mouseButtonDown && controller.isGrounded)
+        {
+            SwitchStateTo(CharacterState.Attacking);
+            return;
+        }
+
+
+
         movementDirection.Set(playerInput.horizontalInput, 0f, playerInput.verticalInput);
         movementDirection.Normalize();
         movementDirection = Quaternion.Euler(0f, -45f, 0f) * movementDirection;
@@ -68,10 +88,19 @@ public class Character : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (isPlayer)
-            CalculatePlayerMovement();
-        else
-            CalculateEnemyMovement();
+        switch (currentState)
+        {
+            case CharacterState.Normal:
+                if (isPlayer)
+                    CalculatePlayerMovement();
+                else
+                    CalculateEnemyMovement();
+                break;
+
+            case CharacterState.Attacking:
+
+                break;
+        }
 
         if (isPlayer)
         {
@@ -83,5 +112,34 @@ public class Character : MonoBehaviour
             movementDirection += verticalVelocity * Vector3.up * Time.deltaTime;
             controller.Move(movementDirection);
         }
+    }
+
+    public void SwitchStateTo(CharacterState newState)
+    {
+        //clear cache
+        playerInput.mouseButtonDown = false;
+
+
+        //exiting state
+        switch (currentState)
+        {
+            case CharacterState.Normal:
+                break;
+            case CharacterState.Attacking:
+                break;
+
+        }
+
+        //Entering state
+        switch (newState)
+        {
+            case CharacterState.Normal:
+                break;
+            case CharacterState.Attacking:
+                break;
+
+        }
+        currentState = newState;
+        Debug.Log("state:" + currentState);
     }
 }
