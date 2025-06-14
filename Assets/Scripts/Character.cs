@@ -21,6 +21,11 @@ public class Character : MonoBehaviour
     public UnityEngine.AI.NavMeshAgent navMeshAgent;
     public Transform targetPlayer;
 
+    //player slides
+    public float attackStartTime;
+    public float attackSlideDuration = 0.4f;
+    public float attackSlideSpeed = 0.06f;
+
 
     //state machine
     public enum CharacterState
@@ -98,7 +103,17 @@ public class Character : MonoBehaviour
                 break;
 
             case CharacterState.Attacking:
+                if (isPlayer)
+                {
+                    movementDirection = Vector3.zero;
 
+                    if (Time.time < attackStartTime + attackSlideDuration)
+                    {
+                        float timePassed = Time.time - attackStartTime;
+                        float lerpTime = timePassed / attackSlideDuration;
+                        movementDirection = Vector3.Lerp(transform.forward * attackSlideSpeed, Vector3.zero, lerpTime);
+                    }
+                }
                 break;
         }
 
@@ -136,10 +151,21 @@ public class Character : MonoBehaviour
             case CharacterState.Normal:
                 break;
             case CharacterState.Attacking:
+                animator.SetTrigger("Attack");
+
+                if (isPlayer)
+                    attackStartTime = Time.time;
+
+
                 break;
 
         }
         currentState = newState;
         Debug.Log("state:" + currentState);
+    }
+
+    public void AttackAnimationEnds()
+    {
+        SwitchStateTo(CharacterState.Normal);
     }
 }
