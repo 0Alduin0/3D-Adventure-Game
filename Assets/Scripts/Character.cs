@@ -1,3 +1,4 @@
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Character : MonoBehaviour
@@ -88,6 +89,8 @@ public class Character : MonoBehaviour
         {
             navMeshAgent.SetDestination(transform.position);
             animator.SetFloat("Speed", 0f);
+
+            SwitchStateTo(CharacterState.Attacking);
         }
     }
 
@@ -131,8 +134,13 @@ public class Character : MonoBehaviour
 
     public void SwitchStateTo(CharacterState newState)
     {
-        //clear cache
-        playerInput.mouseButtonDown = false;
+        if (isPlayer)
+        {
+            //clear cache
+            playerInput.mouseButtonDown = false;
+        }
+
+
 
 
         //exiting state
@@ -151,6 +159,13 @@ public class Character : MonoBehaviour
             case CharacterState.Normal:
                 break;
             case CharacterState.Attacking:
+
+                if (!isPlayer)
+                {
+                    Quaternion newRotation = Quaternion.LookRotation(targetPlayer.position - transform.position);
+                    transform.rotation = newRotation;
+                }
+
                 animator.SetTrigger("Attack");
 
                 if (isPlayer)
